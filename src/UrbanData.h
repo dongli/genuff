@@ -20,6 +20,7 @@ public:
     double area;
     double clon;
     double clat;
+    arma::vec::fixed<3> x;
 
     UrbanData() {
         clon = 0;
