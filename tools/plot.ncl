@@ -10,7 +10,7 @@ begin
 
 	wks = gsn_open_wks("pdf", "uff")
 
-	gsn_define_colormap(wks, "rainbow")
+	gsn_define_colormap(wks, "MPL_Greys")
 
 	res = True
 	res@gsnAddCyclic = False
@@ -18,6 +18,7 @@ begin
 	res@cnFillOn = True
 	res@cnFillMode = "RasterFill"
 	res@gsnSpreadColors = True
+	res@cnLabelBarEndStyle = "ExcludeOuterBoxes"
 	res@mpMinLonF = min(f->lon)+3.5
 	res@mpMaxLonF = max(f->lon)-3.9
 	res@mpMinLatF = min(f->lat)+4.1
