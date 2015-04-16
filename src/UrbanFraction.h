@@ -23,8 +23,8 @@ public:
     void
     increase() {
         int n = heights.size()+1;
-        heights.resize(n+1);
-        areas.resize(n+1);
+        heights.resize(n);
+        areas.resize(n);
     }
 
     int
