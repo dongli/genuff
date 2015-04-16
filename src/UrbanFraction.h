@@ -11,13 +11,13 @@ public:
     double heightMean;      // mean building height
     double heightStd;       // building height standard deviation
     double heightAW;        // plan-area-weighted mean building height
-    arma::vec heightHist;   // building height histogram
+    arma::uvec heightHist;  // building height histogram
     double areaFrac;        // plan area fraction
 
     UrbanFraction() {
         heightMean = 0;
         heightStd = 0;
-        heightHist = arma::zeros(10);
+        heightHist.set_size(HEIGHT_HIST_NUM);
     }
 
     void
@@ -32,5 +32,7 @@ public:
         return heights.size();
     }
 }; // UrbanFraction
+
+static const arma::vec HEIGHT_HIST_BINS = arma::linspace<arma::vec>(0, HEIGHT_HIST_MAX, HEIGHT_HIST_NUM);
 
 #endif // __UrbanFraction__

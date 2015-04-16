@@ -68,8 +68,12 @@ create(const UrbanDatabase &database) {
         data.heightMean = arma::mean(data.heights);
         data.heightStd  = arma::stddev(data.heights);
         data.heightAW   = arma::dot(data.heights, data.areas)/sumArea;
+        if (data.heights.size() > 1) {
+            data.heightHist = arma::histc(data.heights, HEIGHT_HIST_BINS);
+        } else {
+            data.heightHist = arma::trans(arma::histc(data.heights, HEIGHT_HIST_BINS));
+        }
         data.areaFrac = sumArea/data.cellArea;
-
     }
 } // create
 
@@ -93,8 +97,10 @@ outputInGeogrid() const {
 
 void UrbanFractionField::
 outputInNetcdf() const {
+    float *buffer;
     std::cout << "[Notice]: Output urban fraction field." << std::endl;
     NcFile file("uff.nc", NcFile::replace);
+    // Dimensions.
     NcDim lonDim = file.addDim("lon", lon.size());
     NcVar lonVar = file.addVar("lon", ncDouble, lonDim);
     lonVar.putVar(lon.memptr());
@@ -105,15 +111,68 @@ outputInNetcdf() const {
     latVar.putVar(lat.memptr());
     latVar.putAtt("long_name", ncChar, size_t(8), "latitude");
     latVar.putAtt("units", ncChar, size_t(12), "degree_north");
-    std::vector<NcDim> dims2d;
-    dims2d.push_back(latDim); dims2d.push_back(lonDim);
-    NcVar var = file.addVar("h0", ncDouble, dims2d);
+    NcDim hhistDim = file.addDim("hhist", HEIGHT_HIST_NUM);
+    NcVar hhistVar = file.addVar("hhist", ncDouble, hhistDim);
+    hhistVar.putVar(HEIGHT_HIST_BINS.memptr());
+    hhistVar.putAtt("long_name", ncChar, size_t(20), "height histogram bin");
+    hhistVar.putAtt("units", ncChar, size_t(1), "m");
+    // 2D variables.
+    std::vector<NcDim> dims2d(2);
+    dims2d[0] = latDim;
+    dims2d[1] = lonDim;
+    NcVar h0Var = file.addVar("h0", ncFloat, dims2d);
+    h0Var.putAtt("long_name", ncChar, size_t(20), "mean building height");
+    h0Var.putAtt("units", ncChar, size_t(1), "m");
+    NcVar h1Var = file.addVar("h1", ncFloat, dims2d);
+    h1Var.putAtt("long_name", ncChar, size_t(34), "building height standard deviation");
+    h1Var.putAtt("units", ncChar, size_t(1), "m");
+    NcVar h2Var = file.addVar("h2", ncFloat, dims2d);
+    h2Var.putAtt("long_name", ncChar, size_t(39), "plan-area-weighted mean building height");
+    h2Var.putAtt("units", ncChar, size_t(1), "m");
+    NcVar a0Var = file.addVar("a0", ncFloat, dims2d);
+    a0Var.putAtt("long_name", ncChar, size_t(18), "plan area fraction");
+    a0Var.putAtt("units", ncChar, size_t(2), "m2");
 
-    float *buffer = new float[_data.size()];
+    buffer = new float[_data.size()];
     for (int i = 0; i < _data.size(); ++i) {
         const UrbanFraction &data = _data(i);
         buffer[i] = data.heightMean;
     }
-    var.putVar(buffer);
+    h1Var.putVar(buffer);
+    for (int i = 0; i < _data.size(); ++i) {
+        const UrbanFraction &data = _data(i);
+        buffer[i] = data.heightStd;
+    }
+    h2Var.putVar(buffer);
+    for (int i = 0; i < _data.size(); ++i) {
+        const UrbanFraction &data = _data(i);
+        buffer[i] = data.heightAW;
+    }
+    h2Var.putVar(buffer);
+    for (int i = 0; i < _data.size(); ++i) {
+        const UrbanFraction &data = _data(i);
+        buffer[i] = data.areaFrac;
+    }
+    a0Var.putVar(buffer);
+
+    delete [] buffer;
+    // 3D variables.
+    std::vector<NcDim> dims3d(3);
+    dims3d[0] = latDim;
+    dims3d[1] = lonDim;
+    dims3d[2] = hhistDim;
+    NcVar h3Var = file.addVar("h3", ncFloat, dims3d);
+    h3Var.putAtt("long_name", ncChar, size_t(16), "height histogram");
+    h3Var.putAtt("units", ncChar, size_t(1), "1");
+    buffer = new float[_data.size()*HEIGHT_HIST_NUM];
+    int k = 0;
+    for (int i = 0; i < _data.size(); ++i) {
+        const UrbanFraction &data = _data(i);
+        for (int j = 0; j < HEIGHT_HIST_NUM; ++j) {
+            buffer[k++] = data.heightHist[j];
+        }
+    }
+    h3Var.putVar(buffer);
+
     delete [] buffer;
 }

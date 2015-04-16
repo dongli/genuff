@@ -25,7 +25,8 @@ typedef mlpack::neighbor::NeighborSearch<SortPolicy, Metric, Tree> Searcher;
 
 const double PI = M_PI;
 const double RAD = PI/180.0;
-const double HEIGHT_HIST_UNIT = 5;
+const double HEIGHT_HIST_MAX = 75;
+const int HEIGHT_HIST_NUM = HEIGHT_HIST_MAX/5+1;
 const double RADIUS = 6.371e6;
 
 static void
