@@ -11,7 +11,9 @@ find_package (GDAL REQUIRED)
 include_directories (${GDAL_INCLUDE_DIRS})
 
 # Boost
-find_package (Boost 1.55.0 REQUIRED)
+find_package (Boost 1.55.0 REQUIRED
+    COMPONENTS regex
+)
 include_directories (${Boost_INCLUDE_DIRS})
 
 # Armadillo

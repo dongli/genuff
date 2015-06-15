@@ -12,9 +12,14 @@
 #include <cpl_conv.h>
 #include <ogrsf_frmts.h>
 #include <mlpack/methods/neighbor_search/neighbor_search.hpp>
+#include <boost/xpressive/xpressive.hpp>
 #include <netcdf>
 
 using namespace netCDF;
+
+using boost::xpressive::sregex;
+using boost::xpressive::smatch;
+using boost::xpressive::regex_search;
 
 // Shortcuts for MLPACK classes.
 typedef mlpack::neighbor::NearestNeighborSort SortPolicy;

@@ -20,7 +20,18 @@ read(const std::string &filePath) {
     OGRRawPoint *points = new OGRRawPoint[numMaxPoint];
     while ((feature = layer->GetNextFeature()) != NULL) {
         // Record urban data.
-        _data[i].floor = feature->GetFieldAsInteger(FLOOR);
+        sregex reFloor = sregex::compile("(\\d+)(-(\\d+))?");
+        std::string floorStr = feature->GetFieldAsString(FLOOR);
+        smatch what;
+        if (regex_search(floorStr, what, reFloor)) {
+            if (what[2].matched) {
+                _data[i].floor = atoi(what[3].str().c_str());
+            } else {
+                _data[i].floor = atoi(what[1].str().c_str());
+            }
+        } else {
+            std::cout << "[Error]: Failed to parse FLOOR feature \"" << floorStr << "\"!" << std::endl;
+        }
         _data[i].area = feature->GetFieldAsDouble(SHAPE_AREA);
         // Calculate centroid.
         OGRGeometry *geometry = feature->GetGeometryRef();

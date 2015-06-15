@@ -175,4 +175,4 @@ outputInNetcdf() const {
     h3Var.putVar(buffer);
 
     delete [] buffer;
-}
+} // outputInNetcdf

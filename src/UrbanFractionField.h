@@ -29,6 +29,6 @@ public:
 
     void
     outputInNetcdf() const;
-};
+}; // UrbanFractionField
 
 #endif // __UrbanFractionField__
